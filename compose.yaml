@@ -1,0 +1,11 @@
+services:
+  mariadb:
+    image: 'mariadb:latest'
+    environment:
+      - 'MARIADB_DATABASE=grand_cinema'
+      - 'MARIADB_ROOT_PASSWORD=grd_c1n3m4'
+    ports:
+      - '3306:3306'
+    volumes:
+      - './model.sql:/docker-entrypoint-initdb.d/1-model.sql'
+      - './data.sql:/docker-entrypoint-initdb.d/2-data.sql'
