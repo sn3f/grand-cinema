@@ -63,6 +63,16 @@ class SeatSelectionServiceTest {
 	}
 
 	@Test
+	void getSeatsReturnsAllRoomSeats() {
+		when(sessionRepository.findById(1)).thenReturn(Optional.of(session));
+		when(seatRepository.findByRoomIdOrderBySeatNum(1)).thenReturn(List.of(seat1, seat2, seat3));
+
+		List<Seat> seats = seatSelectionService.getSeats(1);
+
+		assertEquals(List.of(seat1, seat2, seat3), seats);
+	}
+
+	@Test
 	void getAvailableSeatsReturnsOnlyFreeSeats() {
 		mockSessionWithReservedSeat2();
 

@@ -31,6 +31,12 @@ public class SeatSelectionService {
 		this.reservationRepository = reservationRepository;
 	}
 
+	// Retourne tous les sièges de la salle de la séance, libres et occupés
+	public List<Seat> getSeats(Integer sessionId) {
+		Session session = findAvailableSession(sessionId);
+		return seatRepository.findByRoomIdOrderBySeatNum(session.getRoom().getId());
+	}
+
 	// Retourne les sièges libres de la séance
 	public List<Seat> getAvailableSeats(Integer sessionId) {
 		Session session = findAvailableSession(sessionId);

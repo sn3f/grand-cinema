@@ -22,6 +22,11 @@ public class SessionController {
 		this.seatSelectionService = seatSelectionService;
 	}
 
+	@GetMapping("/seats")
+	public List<Seat> getSeats(@PathVariable Integer sessionId) {
+		return seatSelectionService.getSeats(sessionId);
+	}
+
 	@GetMapping("/available-seats")
 	public List<Seat> getAvailableSeats(@PathVariable Integer sessionId) {
 		return seatSelectionService.getAvailableSeats(sessionId);
