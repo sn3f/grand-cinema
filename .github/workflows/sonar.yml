@@ -16,6 +16,6 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
-      - run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:5.8.0.7211:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=n3f-Dsonar.projectKey=sn3f_grand-cinema
+      - run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:5.8.0.7211:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=n3f -Dsonar.projectKey=sn3f_grand-cinema
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
