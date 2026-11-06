@@ -18,7 +18,7 @@ public class SecurityConfig {
 		http.cors(Customizer.withDefaults());
 		http.httpBasic(Customizer.withDefaults());
 		http.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/api/auth/me").authenticated()
+				.requestMatchers("/api/auth/me", "/api/sessions/*/reservations").authenticated()
 				.anyRequest().permitAll());
 		return http.build();
 	}

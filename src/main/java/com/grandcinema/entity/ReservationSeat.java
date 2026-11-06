@@ -1,5 +1,7 @@
 package com.grandcinema.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -18,6 +20,8 @@ public class ReservationSeat {
 	@Column(name = "reservation_seat_id")
 	private Integer id;
 
+	// Évite une boucle infinie dans le JSON (réservation -> siège -> réservation...)
+	@JsonIgnore
 	@ManyToOne
 	@JoinColumn(name = "reservation_id")
 	private Reservation reservation;
