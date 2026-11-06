@@ -1,6 +1,7 @@
 -- Mot de passe : "password" (hashé avec BCrypt)
-INSERT INTO users (user_id, first_name, last_name, email, password) VALUES
-    (1, 'Jean', 'Bernard', 'jb@gmail.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG');
+INSERT INTO users (user_id, first_name, last_name, email, password, role) VALUES
+    (1, 'Jean', 'Bernard', 'jb@gmail.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG', 'USER'),
+    (2, 'Admin', 'Cinéma', 'admin@grandcinema.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG', 'ADMIN');
 
 INSERT INTO movies (movie_id, title, duration) VALUES
     (1, 'Gladiator', 155);

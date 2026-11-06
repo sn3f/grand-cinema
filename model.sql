@@ -3,8 +3,8 @@ CREATE TABLE users (
     first_name VARCHAR(64) NOT NULL,
     last_name VARCHAR(64) NOT NULL,
     email VARCHAR(256) NOT NULL UNIQUE,
-    address VARCHAR(256),
-    password VARCHAR(256) NOT NULL
+    password VARCHAR(256) NOT NULL,
+    role VARCHAR(16) NOT NULL CHECK (role IN ('USER', 'ADMIN'))
 );
 
 CREATE TABLE movies (
