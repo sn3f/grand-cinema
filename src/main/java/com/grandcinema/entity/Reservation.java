@@ -3,15 +3,15 @@ package com.grandcinema.entity;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -35,11 +35,9 @@ public class Reservation {
 
 	private String status;
 
-	@ManyToMany
-	@JoinTable(name = "reservation_seats",
-			joinColumns = @JoinColumn(name = "reservation_id"),
-			inverseJoinColumns = @JoinColumn(name = "seat_id"))
-	private List<Seat> seats;
+	// Pour annuler : statut CANCELLED et liste vidée, les lignes retirées sont supprimées et les places libérées
+	@OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<ReservationSeat> reservationSeats;
 
 	public Integer getId() {
 		return id;
@@ -81,12 +79,12 @@ public class Reservation {
 		this.status = status;
 	}
 
-	public List<Seat> getSeats() {
-		return seats;
+	public List<ReservationSeat> getReservationSeats() {
+		return reservationSeats;
 	}
 
-	public void setSeats(List<Seat> seats) {
-		this.seats = seats;
+	public void setReservationSeats(List<ReservationSeat> reservationSeats) {
+		this.reservationSeats = reservationSeats;
 	}
 
 }

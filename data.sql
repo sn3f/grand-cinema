@@ -16,7 +16,9 @@ INSERT INTO sessions (session_id, movie_id, room_id, session_dt) VALUES
     (2, 1, 1, '2026-09-01 20:00:00');
 
 INSERT INTO reservations (reservation_id, user_id, session_id, creation_date, status) VALUES
-    (1, 1, 1, '2026-10-10 09:30:00', 'CONFIRMED');
+    (1, 1, 1, '2026-10-10 09:30:00', 'CONFIRMED'),
+    (2, 1, 1, '2026-10-11 14:00:00', 'CANCELLED');
 
-INSERT INTO reservation_seats (reservation_id, seat_id) VALUES
-    (1, 2), (1, 3);
+-- La réservation annulée (2) n'a plus de sièges : ses places sont libres
+INSERT INTO reservation_seats (reservation_id, session_id, seat_id) VALUES
+    (1, 1, 2), (1, 1, 3);

@@ -45,10 +45,15 @@ CREATE TABLE reservations (
     FOREIGN KEY (session_id) REFERENCES sessions(session_id)
 );
 
+-- Un siège ne peut être réservé qu'une fois par séance.
+-- Une réservation annulée garde son statut CANCELLED mais perd ses lignes ici : ses places sont libérées.
 CREATE TABLE reservation_seats (
+    reservation_seat_id INT AUTO_INCREMENT PRIMARY KEY,
     reservation_id INT NOT NULL,
+    session_id INT NOT NULL,
     seat_id INT NOT NULL,
-    PRIMARY KEY (reservation_id, seat_id),
+    UNIQUE (session_id, seat_id),
     FOREIGN KEY (reservation_id) REFERENCES reservations(reservation_id),
+    FOREIGN KEY (session_id) REFERENCES sessions(session_id),
     FOREIGN KEY (seat_id) REFERENCES seats(seat_id)
 );

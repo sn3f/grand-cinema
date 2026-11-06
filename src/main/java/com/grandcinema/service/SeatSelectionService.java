@@ -3,16 +3,17 @@ package com.grandcinema.service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.grandcinema.entity.Reservation;
+import com.grandcinema.entity.ReservationSeat;
 import com.grandcinema.entity.Seat;
 import com.grandcinema.entity.Session;
-import com.grandcinema.repository.ReservationRepository;
+import com.grandcinema.repository.ReservationSeatRepository;
 import com.grandcinema.repository.SeatRepository;
 import com.grandcinema.repository.SessionRepository;
 
@@ -22,13 +23,13 @@ public class SeatSelectionService {
 
 	private final SessionRepository sessionRepository;
 	private final SeatRepository seatRepository;
-	private final ReservationRepository reservationRepository;
+	private final ReservationSeatRepository reservationSeatRepository;
 
 	public SeatSelectionService(SessionRepository sessionRepository, SeatRepository seatRepository,
-			ReservationRepository reservationRepository) {
+			ReservationSeatRepository reservationSeatRepository) {
 		this.sessionRepository = sessionRepository;
 		this.seatRepository = seatRepository;
-		this.reservationRepository = reservationRepository;
+		this.reservationSeatRepository = reservationSeatRepository;
 	}
 
 	// Retourne tous les sièges de la salle de la séance, libres et occupés
@@ -85,21 +86,22 @@ public class SeatSelectionService {
 
 	// Une séance est disponible si elle existe et qu'elle n'est pas encore passée
 	private Session findAvailableSession(Integer sessionId) {
-		Session session = sessionRepository.findById(sessionId)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Séance introuvable"));
+		Optional<Session> result = sessionRepository.findById(sessionId);
+		if (result.isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Séance introuvable");
+		}
+		Session session = result.get();
 		if (session.getSessionDt().isBefore(LocalDateTime.now())) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "La séance est déjà passée");
 		}
 		return session;
 	}
 
-	// Un siège est occupé s'il fait partie d'une réservation de la séance
+	// Un siège est occupé s'il est réservé pour la séance (une réservation annulée n'a plus de sièges)
 	private List<Integer> findOccupiedSeatIds(Integer sessionId) {
 		List<Integer> occupiedSeatIds = new ArrayList<>();
-		for (Reservation reservation : reservationRepository.findBySessionId(sessionId)) {
-			for (Seat seat : reservation.getSeats()) {
-				occupiedSeatIds.add(seat.getId());
-			}
+		for (ReservationSeat reservationSeat : reservationSeatRepository.findBySessionId(sessionId)) {
+			occupiedSeatIds.add(reservationSeat.getSeat().getId());
 		}
 		return occupiedSeatIds;
 	}
