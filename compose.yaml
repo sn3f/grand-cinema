@@ -9,3 +9,8 @@ services:
     volumes:
       - './model.sql:/docker-entrypoint-initdb.d/1-model.sql'
       - './data.sql:/docker-entrypoint-initdb.d/2-data.sql'
+  mailpit:
+    image: 'axllent/mailpit:latest'
+    ports:
+      - '1025:1025'
+      - '8025:8025'

@@ -25,16 +25,19 @@ public class ReservationService {
 	private final UserService userService;
 	private final SessionRepository sessionRepository;
 	private final ReservationRepository reservationRepository;
+	private final TicketEmailService ticketEmailService;
 
 	public ReservationService(SeatSelectionService seatSelectionService, UserService userService,
-			SessionRepository sessionRepository, ReservationRepository reservationRepository) {
+			SessionRepository sessionRepository, ReservationRepository reservationRepository,
+			TicketEmailService ticketEmailService) {
 		this.seatSelectionService = seatSelectionService;
 		this.userService = userService;
 		this.sessionRepository = sessionRepository;
 		this.reservationRepository = reservationRepository;
+		this.ticketEmailService = ticketEmailService;
 	}
 
-	// Revérifie la sélection (règles de l'US03) puis enregistre la réservation de l'utilisateur connecté
+	// Revérifie la sélection (règles de l'US03), enregistre la réservation de l'utilisateur connecté et envoie le billet par e-mail
 	@Transactional
 	public Reservation confirm(Integer sessionId, List<Integer> seatIds, String email) {
 		List<Seat> seats = seatSelectionService.selectSeats(sessionId, seatIds.size(), seatIds);
@@ -58,11 +61,15 @@ public class ReservationService {
 		reservation.setReservationSeats(reservationSeats);
 
 		// Deux réservations simultanées : la contrainte UNIQUE(session_id, seat_id) refuse la seconde
+		Reservation savedReservation;
 		try {
-			return reservationRepository.saveAndFlush(reservation);
+			savedReservation = reservationRepository.saveAndFlush(reservation);
 		} catch (DataIntegrityViolationException exception) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "Un des sièges vient d'être réservé");
 		}
+
+		ticketEmailService.sendTicket(savedReservation);
+		return savedReservation;
 	}
 
 }

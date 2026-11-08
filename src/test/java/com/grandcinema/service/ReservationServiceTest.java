@@ -3,6 +3,7 @@ package com.grandcinema.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -42,6 +43,9 @@ class ReservationServiceTest {
 	@Mock
 	private ReservationRepository reservationRepository;
 
+	@Mock
+	private TicketEmailService ticketEmailService;
+
 	@InjectMocks
 	private ReservationService reservationService;
 
@@ -69,7 +73,9 @@ class ReservationServiceTest {
 
 	@Test
 	void confirmSavesConfirmedReservationForConnectedUser() {
-		reservationService.confirm(1, List.of(1, 3), "jb@gmail.com");
+		when(reservationRepository.saveAndFlush(any(Reservation.class))).thenReturn(new Reservation());
+
+		Reservation result = reservationService.confirm(1, List.of(1, 3), "jb@gmail.com");
 
 		ArgumentCaptor<Reservation> savedReservation = ArgumentCaptor.forClass(Reservation.class);
 		verify(reservationRepository).saveAndFlush(savedReservation.capture());
@@ -81,6 +87,9 @@ class ReservationServiceTest {
 		assertEquals(2, reservation.getReservationSeats().size());
 		assertEquals(seat1, reservation.getReservationSeats().get(0).getSeat());
 		assertEquals(seat3, reservation.getReservationSeats().get(1).getSeat());
+
+		// Le billet est envoyé par e-mail pour la réservation enregistrée
+		verify(ticketEmailService).sendTicket(result);
 	}
 
 	// Deux clients valident en même temps : la base refuse la seconde réservation
@@ -92,6 +101,7 @@ class ReservationServiceTest {
 		ResponseStatusException exception = assertThrows(ResponseStatusException.class,
 				() -> reservationService.confirm(1, List.of(1, 3), "jb@gmail.com"));
 		assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
+		verify(ticketEmailService, never()).sendTicket(any(Reservation.class));
 	}
 
 }
