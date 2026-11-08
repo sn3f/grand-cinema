@@ -3,6 +3,7 @@ package com.grandcinema.service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -49,6 +50,7 @@ public class ReservationService {
 		reservation.setSession(session);
 		reservation.setCreationDate(LocalDateTime.now());
 		reservation.setStatus("CONFIRMED");
+		reservation.setTicketCode(UUID.randomUUID().toString());
 
 		List<ReservationSeat> reservationSeats = new ArrayList<>();
 		for (Seat seat : seats) {
@@ -70,6 +72,11 @@ public class ReservationService {
 
 		ticketEmailService.sendTicket(savedReservation);
 		return savedReservation;
+	}
+
+	// Billets de l'utilisateur connecté : ses réservations confirmées, de la plus proche séance à la plus lointaine
+	public List<Reservation> getMyTickets(String email) {
+		return reservationRepository.findByUserEmailAndStatusOrderBySessionSessionDt(email, "CONFIRMED");
 	}
 
 }

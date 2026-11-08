@@ -39,7 +39,7 @@ class TicketEmailServiceTest {
 	// Réservation n°7 de Jean pour Inception, salle 1, sièges 2 et 3
 	@BeforeEach
 	void setUp() {
-		ticketEmailService = new TicketEmailService(mailSender, "billetterie@grandcinema.com");
+		ticketEmailService = new TicketEmailService(mailSender, "billetterie@grandcinema.com", "http://localhost:5173");
 
 		User user = new User();
 		user.setFirstName("Jean");
@@ -85,6 +85,7 @@ class TicketEmailServiceTest {
 		assertTrue(message.getText().contains("15/01/2027 à 20:00"));
 		assertTrue(message.getText().contains("Salle 1"));
 		assertTrue(message.getText().contains("2, 3"));
+		assertTrue(message.getText().contains("http://localhost:5173"));
 	}
 
 	// Serveur d'e-mail injoignable : pas d'erreur, la réservation reste confirmée

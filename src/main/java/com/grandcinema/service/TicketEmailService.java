@@ -24,10 +24,13 @@ public class TicketEmailService {
 
 	private final JavaMailSender mailSender;
 	private final String from;
+	private final String frontUrl;
 
-	public TicketEmailService(JavaMailSender mailSender, @Value("${mail.from}") String from) {
+	public TicketEmailService(JavaMailSender mailSender, @Value("${mail.from}") String from,
+			@Value("${front.url}") String frontUrl) {
 		this.mailSender = mailSender;
 		this.from = from;
+		this.frontUrl = frontUrl;
 	}
 
 	// Envoie le billet par e-mail ; si l'envoi échoue, la réservation reste confirmée
@@ -53,7 +56,9 @@ public class TicketEmailService {
 				+ "Séance : " + date + "\n"
 				+ "Salle : " + session.getRoom().getName() + "\n"
 				+ "Siège(s) : " + String.join(", ", seatNumbers) + "\n\n"
-				+ "Présentez ce billet (ou son QR code dans l'application) à l'entrée du cinéma.");
+				+ "Retrouvez votre billet et son QR code dans l'application, rubrique « Mes billets » :\n"
+				+ frontUrl + "\n\n"
+				+ "Présentez le QR code à l'entrée du cinéma.");
 
 		try {
 			mailSender.send(message);

@@ -35,6 +35,8 @@ public class Reservation {
 
 	private String status;
 
+	private String ticketCode;
+
 	// Pour annuler : statut CANCELLED et liste vidée, les lignes retirées sont supprimées et les places libérées
 	@OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<ReservationSeat> reservationSeats;
@@ -77,6 +79,14 @@ public class Reservation {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public String getTicketCode() {
+		return ticketCode;
+	}
+
+	public void setTicketCode(String ticketCode) {
+		this.ticketCode = ticketCode;
 	}
 
 	public List<ReservationSeat> getReservationSeats() {

@@ -65,7 +65,9 @@ class ReservationServiceTest {
 		seat1.setId(1);
 		seat3 = new Seat();
 		seat3.setId(3);
+	}
 
+	private void givenValidSelection() {
 		when(seatSelectionService.selectSeats(1, 2, List.of(1, 3))).thenReturn(List.of(seat1, seat3));
 		when(userService.getByEmail("jb@gmail.com")).thenReturn(user);
 		when(sessionRepository.findById(1)).thenReturn(Optional.of(session));
@@ -73,6 +75,7 @@ class ReservationServiceTest {
 
 	@Test
 	void confirmSavesConfirmedReservationForConnectedUser() {
+		givenValidSelection();
 		when(reservationRepository.saveAndFlush(any(Reservation.class))).thenReturn(new Reservation());
 
 		Reservation result = reservationService.confirm(1, List.of(1, 3), "jb@gmail.com");
@@ -87,6 +90,7 @@ class ReservationServiceTest {
 		assertEquals(2, reservation.getReservationSeats().size());
 		assertEquals(seat1, reservation.getReservationSeats().get(0).getSeat());
 		assertEquals(seat3, reservation.getReservationSeats().get(1).getSeat());
+		assertEquals(36, reservation.getTicketCode().length());
 
 		// Le billet est envoyé par e-mail pour la réservation enregistrée
 		verify(ticketEmailService).sendTicket(result);
@@ -95,6 +99,7 @@ class ReservationServiceTest {
 	// Deux clients valident en même temps : la base refuse la seconde réservation
 	@Test
 	void confirmReturnsConflictWhenSeatTakenAtTheSameTime() {
+		givenValidSelection();
 		when(reservationRepository.saveAndFlush(any(Reservation.class)))
 				.thenThrow(new DataIntegrityViolationException("Duplicate entry for key session_id"));
 
@@ -102,6 +107,18 @@ class ReservationServiceTest {
 				() -> reservationService.confirm(1, List.of(1, 3), "jb@gmail.com"));
 		assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
 		verify(ticketEmailService, never()).sendTicket(any(Reservation.class));
+	}
+
+	// « Mes billets » : seulement les réservations confirmées de l'utilisateur connecté
+	@Test
+	void getMyTicketsReturnsConfirmedReservationsOfConnectedUser() {
+		Reservation ticket = new Reservation();
+		when(reservationRepository.findByUserEmailAndStatusOrderBySessionSessionDt("jb@gmail.com", "CONFIRMED"))
+				.thenReturn(List.of(ticket));
+
+		List<Reservation> tickets = reservationService.getMyTickets("jb@gmail.com");
+
+		assertEquals(List.of(ticket), tickets);
 	}
 
 }

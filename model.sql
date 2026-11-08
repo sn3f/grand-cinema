@@ -41,6 +41,7 @@ CREATE TABLE reservations (
     session_id INT NOT NULL,
     creation_date DATETIME NOT NULL,
     status VARCHAR(64) NOT NULL,
+    ticket_code VARCHAR(36) NOT NULL UNIQUE,
     FOREIGN KEY (user_id) REFERENCES users(user_id),
     FOREIGN KEY (session_id) REFERENCES sessions(session_id)
 );
