@@ -12,6 +12,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
 
 	List<Reservation> findAllByOrderByCreationDateDesc();
 
-	long countByStatus(String status);
+	long countBySessionIdAndStatus(Integer sessionId, String status);
 
 }

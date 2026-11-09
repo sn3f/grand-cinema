@@ -3,6 +3,7 @@ package com.grandcinema.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,10 +63,12 @@ class StatsServiceTest {
 		when(seatRepository.findByRoomIdOrderBySeatNum(1)).thenReturn(createSeats(5));
 		when(reservationSeatRepository.findBySessionId(1)).thenReturn(createReservationSeats(2, 1));
 		when(reservationSeatRepository.findBySessionId(2)).thenReturn(createReservationSeats(5, 0));
-		when(reservationRepository.countByStatus("CONFIRMED")).thenReturn(2L);
-		when(reservationRepository.countByStatus("CANCELLED")).thenReturn(1L);
+		when(reservationRepository.countBySessionIdAndStatus(1, "CONFIRMED")).thenReturn(1L);
+		when(reservationRepository.countBySessionIdAndStatus(1, "CANCELLED")).thenReturn(1L);
+		when(reservationRepository.countBySessionIdAndStatus(2, "CONFIRMED")).thenReturn(1L);
+		when(reservationRepository.countBySessionIdAndStatus(2, "CANCELLED")).thenReturn(0L);
 
-		stats = statsService.getStats();
+		stats = statsService.getStats(null, null);
 	}
 
 	@Test
@@ -105,6 +108,18 @@ class StatsServiceTest {
 		assertEquals(70, stats.total().fillRate());
 		assertEquals(2, stats.confirmedReservations());
 		assertEquals(1, stats.cancelledReservations());
+	}
+
+	// Analyse par période (US13) : le 4 octobre ne contient aucune séance, le 3 octobre contient les deux
+	@Test
+	void periodKeepsOnlySessionsBetweenTheTwoDates() {
+		Stats emptyDay = statsService.getStats(LocalDate.of(2026, 10, 4), LocalDate.of(2026, 10, 4));
+		Stats sessionDay = statsService.getStats(LocalDate.of(2026, 10, 3), LocalDate.of(2026, 10, 3));
+
+		assertEquals(0, emptyDay.sessions().size());
+		assertEquals(0, emptyDay.total().fillRate());
+		assertEquals(2, sessionDay.sessions().size());
+		assertEquals(70, sessionDay.total().fillRate());
 	}
 
 	private Session createSession(Integer id, Room room, LocalDateTime sessionDt) {
