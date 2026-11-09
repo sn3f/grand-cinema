@@ -31,7 +31,7 @@ CREATE TABLE sessions (
     movie_id INT NOT NULL,
     room_id INT NOT NULL,
     session_dt DATETIME NOT NULL,
-    FOREIGN KEY (movie_id) REFERENCES movies(movie_id),
+    FOREIGN KEY (movie_id) REFERENCES movies(movie_id) ON DELETE CASCADE,
     FOREIGN KEY (room_id) REFERENCES rooms(room_id)
 );
 
@@ -43,7 +43,7 @@ CREATE TABLE reservations (
     status VARCHAR(64) NOT NULL,
     ticket_code VARCHAR(36) NOT NULL UNIQUE,
     FOREIGN KEY (user_id) REFERENCES users(user_id),
-    FOREIGN KEY (session_id) REFERENCES sessions(session_id)
+    FOREIGN KEY (session_id) REFERENCES sessions(session_id) ON DELETE CASCADE
 );
 
 -- Un siège ne peut être réservé qu'une fois par séance.
@@ -54,7 +54,7 @@ CREATE TABLE reservation_seats (
     session_id INT NOT NULL,
     seat_id INT NOT NULL,
     UNIQUE (session_id, seat_id),
-    FOREIGN KEY (reservation_id) REFERENCES reservations(reservation_id),
-    FOREIGN KEY (session_id) REFERENCES sessions(session_id),
+    FOREIGN KEY (reservation_id) REFERENCES reservations(reservation_id) ON DELETE CASCADE,
+    FOREIGN KEY (session_id) REFERENCES sessions(session_id) ON DELETE CASCADE,
     FOREIGN KEY (seat_id) REFERENCES seats(seat_id)
 );
