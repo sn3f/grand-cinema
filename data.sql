@@ -8,10 +8,12 @@ INSERT INTO movies (movie_id, title, duration) VALUES
     (2, 'Interstellar', 169);
 
 INSERT INTO rooms (room_id, name) VALUES
-    (1, 'Salle 1');
+    (1, 'Salle 1'),
+    (2, 'Salle 2');
 
 INSERT INTO seats (seat_id, room_id, seat_num) VALUES
-    (1, 1, 1), (2, 1, 2), (3, 1, 3), (4, 1, 4), (5, 1, 5);
+    (1, 1, 1), (2, 1, 2), (3, 1, 3), (4, 1, 4), (5, 1, 5),
+    (6, 2, 1), (7, 2, 2), (8, 2, 3), (9, 2, 4), (10, 2, 5), (11, 2, 6), (12, 2, 7), (13, 2, 8);
 
 INSERT INTO sessions (session_id, movie_id, room_id, session_dt) VALUES
     (1, 1, 1, '2027-01-15 20:00:00'),
