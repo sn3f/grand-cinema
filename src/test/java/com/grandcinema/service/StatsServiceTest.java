@@ -23,6 +23,7 @@ import com.grandcinema.entity.ReservationSeat;
 import com.grandcinema.entity.Room;
 import com.grandcinema.entity.Seat;
 import com.grandcinema.entity.Session;
+import com.grandcinema.repository.ReservationRepository;
 import com.grandcinema.repository.ReservationSeatRepository;
 import com.grandcinema.repository.SeatRepository;
 import com.grandcinema.repository.SessionRepository;
@@ -38,6 +39,9 @@ class StatsServiceTest {
 
 	@Mock
 	private ReservationSeatRepository reservationSeatRepository;
+
+	@Mock
+	private ReservationRepository reservationRepository;
 
 	@InjectMocks
 	private StatsService statsService;
@@ -58,6 +62,8 @@ class StatsServiceTest {
 		when(seatRepository.findByRoomIdOrderBySeatNum(1)).thenReturn(createSeats(5));
 		when(reservationSeatRepository.findBySessionId(1)).thenReturn(createReservationSeats(2, 1));
 		when(reservationSeatRepository.findBySessionId(2)).thenReturn(createReservationSeats(5, 0));
+		when(reservationRepository.countByStatus("CONFIRMED")).thenReturn(2L);
+		when(reservationRepository.countByStatus("CANCELLED")).thenReturn(1L);
 
 		stats = statsService.getStats();
 	}
@@ -89,6 +95,16 @@ class StatsServiceTest {
 		assertEquals(2, stats.hours().get(0).bookedSeats());
 		assertEquals("20:00", stats.hours().get(1).label());
 		assertEquals(5, stats.hours().get(1).bookedSeats());
+	}
+
+	// Indicateurs du tableau de bord (US12) : cumul de toutes les séances et nombre de réservations
+	@Test
+	void totalAddsUpAllSessionsAndCountsReservations() {
+		assertEquals(7, stats.total().bookedSeats());
+		assertEquals(10, stats.total().totalSeats());
+		assertEquals(70, stats.total().fillRate());
+		assertEquals(2, stats.confirmedReservations());
+		assertEquals(1, stats.cancelledReservations());
 	}
 
 	private Session createSession(Integer id, Room room, LocalDateTime sessionDt) {

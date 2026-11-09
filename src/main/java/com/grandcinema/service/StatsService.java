@@ -12,6 +12,7 @@ import com.grandcinema.dto.SessionStats;
 import com.grandcinema.dto.Stats;
 import com.grandcinema.entity.ReservationSeat;
 import com.grandcinema.entity.Session;
+import com.grandcinema.repository.ReservationRepository;
 import com.grandcinema.repository.ReservationSeatRepository;
 import com.grandcinema.repository.SeatRepository;
 import com.grandcinema.repository.SessionRepository;
@@ -22,17 +23,22 @@ public class StatsService {
 	private final SessionRepository sessionRepository;
 	private final SeatRepository seatRepository;
 	private final ReservationSeatRepository reservationSeatRepository;
+	private final ReservationRepository reservationRepository;
 
 	public StatsService(SessionRepository sessionRepository, SeatRepository seatRepository,
-			ReservationSeatRepository reservationSeatRepository) {
+			ReservationSeatRepository reservationSeatRepository, ReservationRepository reservationRepository) {
 		this.sessionRepository = sessionRepository;
 		this.seatRepository = seatRepository;
 		this.reservationSeatRepository = reservationSeatRepository;
+		this.reservationRepository = reservationRepository;
 	}
 
-	// Taux de remplissage de chaque séance (places des réservations confirmées / capacité de la salle), puis cumul par salle et par horaire
+	// Taux de remplissage de chaque séance (places des réservations confirmées / capacité de la salle),
+	// cumul par salle, par horaire et au total, nombre de réservations confirmées et annulées
 	public Stats getStats() {
 		List<SessionStats> sessions = new ArrayList<>();
+		int totalBooked = 0;
+		int totalSeats = 0;
 		Map<String, Integer> bookedByRoom = new TreeMap<>();
 		Map<String, Integer> totalByRoom = new TreeMap<>();
 		Map<String, Integer> bookedByHour = new TreeMap<>();
@@ -50,9 +56,13 @@ public class StatsService {
 			add(totalByRoom, room, total);
 			add(bookedByHour, hour, booked);
 			add(totalByHour, hour, total);
+			totalBooked = totalBooked + booked;
+			totalSeats = totalSeats + total;
 		}
 
-		return new Stats(sessions, toGroups(bookedByRoom, totalByRoom), toGroups(bookedByHour, totalByHour));
+		GroupStats globalStats = new GroupStats("Total", totalBooked, totalSeats, fillRate(totalBooked, totalSeats));
+		return new Stats(sessions, toGroups(bookedByRoom, totalByRoom), toGroups(bookedByHour, totalByHour), globalStats,
+				reservationRepository.countByStatus("CONFIRMED"), reservationRepository.countByStatus("CANCELLED"));
 	}
 
 	private int countConfirmedSeats(Integer sessionId) {
