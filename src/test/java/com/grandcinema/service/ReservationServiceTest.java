@@ -21,6 +21,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.grandcinema.entity.Movie;
 import com.grandcinema.entity.Reservation;
 import com.grandcinema.entity.Seat;
 import com.grandcinema.entity.Session;
@@ -119,6 +120,55 @@ class ReservationServiceTest {
 		List<Reservation> tickets = reservationService.getMyTickets("jb@gmail.com");
 
 		assertEquals(List.of(ticket), tickets);
+	}
+
+	// Recherche de l'administrateur : réservation n°1 de Jean Bernard pour Gladiator, n°2 d'Alice Martin pour Interstellar
+	private void givenTwoReservations() {
+		Reservation gladiator = createReservation(1, "Jean", "Bernard", "jb@gmail.com", "Gladiator");
+		Reservation interstellar = createReservation(2, "Alice", "Martin", "am@gmail.com", "Interstellar");
+		when(reservationRepository.findAllByOrderByCreationDateDesc()).thenReturn(List.of(gladiator, interstellar));
+	}
+
+	@Test
+	void searchWithEmptyTextReturnsAllReservations() {
+		givenTwoReservations();
+
+		assertEquals(2, reservationService.search("").size());
+	}
+
+	@Test
+	void searchFindsByClientNameIgnoringCase() {
+		givenTwoReservations();
+
+		List<Reservation> found = reservationService.search("MARTIN");
+
+		assertEquals(1, found.size());
+		assertEquals(2, found.get(0).getId());
+	}
+
+	@Test
+	void searchFindsByReservationNumberOrMovieTitle() {
+		givenTwoReservations();
+
+		assertEquals(1, reservationService.search("1").get(0).getId());
+		assertEquals(2, reservationService.search("inter").get(0).getId());
+	}
+
+	private Reservation createReservation(Integer id, String firstName, String lastName, String email, String title) {
+		User client = new User();
+		client.setFirstName(firstName);
+		client.setLastName(lastName);
+		client.setEmail(email);
+		Movie movie = new Movie();
+		movie.setTitle(title);
+		Session reservedSession = new Session();
+		reservedSession.setMovie(movie);
+
+		Reservation reservation = new Reservation();
+		reservation.setId(id);
+		reservation.setUser(client);
+		reservation.setSession(reservedSession);
+		return reservation;
 	}
 
 }

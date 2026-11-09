@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.grandcinema.entity.Reservation;
@@ -18,6 +19,11 @@ public class ReservationController {
 
 	public ReservationController(ReservationService reservationService) {
 		this.reservationService = reservationService;
+	}
+
+	@GetMapping
+	public List<Reservation> search(@RequestParam(required = false) String search) {
+		return reservationService.search(search);
 	}
 
 	@GetMapping("/mine")

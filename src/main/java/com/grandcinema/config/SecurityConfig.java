@@ -20,7 +20,7 @@ public class SecurityConfig {
 		http.httpBasic(Customizer.withDefaults());
 		http.authorizeHttpRequests(auth -> auth
 				.requestMatchers("/api/auth/me", "/api/sessions/*/reservations", "/api/reservations/mine").authenticated()
-				.requestMatchers("/api/movies/**", "/api/rooms").hasRole("ADMIN")
+				.requestMatchers("/api/movies/**", "/api/rooms", "/api/reservations").hasRole("ADMIN")
 				.requestMatchers(HttpMethod.POST, "/api/sessions").hasRole("ADMIN")
 				.requestMatchers(HttpMethod.PUT, "/api/sessions/*").hasRole("ADMIN")
 				.requestMatchers(HttpMethod.DELETE, "/api/sessions/*").hasRole("ADMIN")

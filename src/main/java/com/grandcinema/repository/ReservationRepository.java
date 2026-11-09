@@ -10,4 +10,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
 
 	List<Reservation> findByUserEmailAndStatusOrderBySessionSessionDt(String email, String status);
 
+	List<Reservation> findAllByOrderByCreationDateDesc();
+
 }
