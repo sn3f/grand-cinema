@@ -18,11 +18,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.grandcinema.entity.Reservation;
+import com.grandcinema.entity.ReservationSeat;
 import com.grandcinema.entity.Room;
 import com.grandcinema.entity.Seat;
 import com.grandcinema.entity.Session;
-import com.grandcinema.repository.ReservationRepository;
+import com.grandcinema.repository.ReservationSeatRepository;
 import com.grandcinema.repository.SeatRepository;
 import com.grandcinema.repository.SessionRepository;
 
@@ -36,7 +36,7 @@ class SeatSelectionServiceTest {
 	private SeatRepository seatRepository;
 
 	@Mock
-	private ReservationRepository reservationRepository;
+	private ReservationSeatRepository reservationSeatRepository;
 
 	@InjectMocks
 	private SeatSelectionService seatSelectionService;
@@ -142,12 +142,12 @@ class SeatSelectionServiceTest {
 
 	// Les faux repositories renvoient la séance, ses 3 sièges et une réservation sur le siège 2
 	private void mockSessionWithReservedSeat2() {
-		Reservation reservation = new Reservation();
-		reservation.setSeats(List.of(seat2));
+		ReservationSeat reservedSeat2 = new ReservationSeat();
+		reservedSeat2.setSeat(seat2);
 
 		when(sessionRepository.findById(1)).thenReturn(Optional.of(session));
 		when(seatRepository.findByRoomIdOrderBySeatNum(1)).thenReturn(List.of(seat1, seat2, seat3));
-		when(reservationRepository.findBySessionId(1)).thenReturn(List.of(reservation));
+		when(reservationSeatRepository.findBySessionId(1)).thenReturn(List.of(reservedSeat2));
 	}
 
 	private Seat createSeat(Integer id, Room room) {

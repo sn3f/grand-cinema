@@ -3,8 +3,8 @@ CREATE TABLE users (
     first_name VARCHAR(64) NOT NULL,
     last_name VARCHAR(64) NOT NULL,
     email VARCHAR(256) NOT NULL UNIQUE,
-    address VARCHAR(256),
-    password VARCHAR(256) NOT NULL
+    password VARCHAR(256) NOT NULL,
+    role VARCHAR(16) NOT NULL CHECK (role IN ('USER', 'ADMIN'))
 );
 
 CREATE TABLE movies (
@@ -31,7 +31,7 @@ CREATE TABLE sessions (
     movie_id INT NOT NULL,
     room_id INT NOT NULL,
     session_dt DATETIME NOT NULL,
-    FOREIGN KEY (movie_id) REFERENCES movies(movie_id),
+    FOREIGN KEY (movie_id) REFERENCES movies(movie_id) ON DELETE CASCADE,
     FOREIGN KEY (room_id) REFERENCES rooms(room_id)
 );
 
@@ -41,14 +41,20 @@ CREATE TABLE reservations (
     session_id INT NOT NULL,
     creation_date DATETIME NOT NULL,
     status VARCHAR(64) NOT NULL,
+    ticket_code VARCHAR(36) NOT NULL UNIQUE,
     FOREIGN KEY (user_id) REFERENCES users(user_id),
-    FOREIGN KEY (session_id) REFERENCES sessions(session_id)
+    FOREIGN KEY (session_id) REFERENCES sessions(session_id) ON DELETE CASCADE
 );
 
+-- Un siège ne peut être réservé qu'une fois par séance.
+-- Une réservation annulée garde son statut CANCELLED mais perd ses lignes ici : ses places sont libérées.
 CREATE TABLE reservation_seats (
+    reservation_seat_id INT AUTO_INCREMENT PRIMARY KEY,
     reservation_id INT NOT NULL,
+    session_id INT NOT NULL,
     seat_id INT NOT NULL,
-    PRIMARY KEY (reservation_id, seat_id),
-    FOREIGN KEY (reservation_id) REFERENCES reservations(reservation_id),
+    UNIQUE (session_id, seat_id),
+    FOREIGN KEY (reservation_id) REFERENCES reservations(reservation_id) ON DELETE CASCADE,
+    FOREIGN KEY (session_id) REFERENCES sessions(session_id) ON DELETE CASCADE,
     FOREIGN KEY (seat_id) REFERENCES seats(seat_id)
 );

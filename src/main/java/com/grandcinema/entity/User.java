@@ -1,7 +1,11 @@
 package com.grandcinema.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -22,9 +26,12 @@ public class User {
 
 	private String email;
 
-	private String address;
-
+	// Le mot de passe (même hashé) n'est jamais renvoyé dans les réponses JSON
+	@JsonIgnore
 	private String password;
+
+	@Enumerated(EnumType.STRING)
+	private Role role;
 
 	public Integer getId() {
 		return id;
@@ -58,20 +65,20 @@ public class User {
 		this.email = email;
 	}
 
-	public String getAddress() {
-		return address;
-	}
-
-	public void setAddress(String address) {
-		this.address = address;
-	}
-
 	public String getPassword() {
 		return password;
 	}
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public Role getRole() {
+		return role;
+	}
+
+	public void setRole(Role role) {
+		this.role = role;
 	}
 
 }

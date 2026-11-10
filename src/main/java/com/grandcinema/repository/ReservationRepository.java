@@ -8,6 +8,10 @@ import com.grandcinema.entity.Reservation;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Integer> {
 
-	List<Reservation> findBySessionId(Integer sessionId);
+	List<Reservation> findByUserEmailAndStatusOrderBySessionSessionDt(String email, String status);
+
+	List<Reservation> findAllByOrderByCreationDateDesc();
+
+	long countBySessionIdAndStatus(Integer sessionId, String status);
 
 }
