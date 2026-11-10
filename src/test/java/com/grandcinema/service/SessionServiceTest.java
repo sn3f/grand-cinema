@@ -93,6 +93,54 @@ class SessionServiceTest {
 	}
 
 	@Test
+	void createRejectsUnknownRoom() {
+		when(movieRepository.findById(1)).thenReturn(Optional.of(new Movie()));
+		when(roomRepository.findById(99)).thenReturn(Optional.empty());
+
+		ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+				() -> sessionService.create(new SessionRequest(1, 99, DATE)));
+
+		assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+	}
+
+	@Test
+	void updateChangesMovieRoomAndDateOfExistingSession() {
+		Session session = createSession(5, LocalDateTime.of(2027, 1, 1, 14, 0));
+		Movie movie = new Movie();
+		Room room = new Room();
+		when(sessionRepository.findById(5)).thenReturn(Optional.of(session));
+		when(movieRepository.findById(1)).thenReturn(Optional.of(movie));
+		when(roomRepository.findById(2)).thenReturn(Optional.of(room));
+
+		sessionService.update(5, new SessionRequest(1, 2, DATE));
+
+		verify(sessionRepository).save(session);
+		assertEquals(movie, session.getMovie());
+		assertEquals(room, session.getRoom());
+		assertEquals(DATE, session.getSessionDt());
+	}
+
+	@Test
+	void updateRejectsUnknownSession() {
+		when(sessionRepository.findById(99)).thenReturn(Optional.empty());
+
+		ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+				() -> sessionService.update(99, new SessionRequest(1, 2, DATE)));
+
+		assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+	}
+
+	@Test
+	void deleteRemovesExistingSession() {
+		Session session = createSession(5, DATE);
+		when(sessionRepository.findById(5)).thenReturn(Optional.of(session));
+
+		sessionService.delete(5);
+
+		verify(sessionRepository).delete(session);
+	}
+
+	@Test
 	void deleteRejectsUnknownSession() {
 		when(sessionRepository.findById(99)).thenReturn(Optional.empty());
 

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.grandcinema.dto.MovieRequest;
 import com.grandcinema.entity.Movie;
 import com.grandcinema.service.MovieService;
 
@@ -34,13 +35,13 @@ public class MovieController {
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public Movie create(@RequestBody Movie movie) {
-		return movieService.create(movie);
+	public Movie create(@RequestBody MovieRequest request) {
+		return movieService.create(request);
 	}
 
 	@PutMapping("/{id}")
-	public Movie update(@PathVariable Integer id, @RequestBody Movie movie) {
-		return movieService.update(id, movie);
+	public Movie update(@PathVariable Integer id, @RequestBody MovieRequest request) {
+		return movieService.update(id, request);
 	}
 
 	@DeleteMapping("/{id}")

@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,6 +17,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.server.ResponseStatusException;
@@ -71,6 +75,43 @@ class UserServiceTest {
 		RegisterRequest request = new RegisterRequest("Marie", "Durand", "marie@test.com", "");
 
 		assertStatus(HttpStatus.BAD_REQUEST, () -> userService.register(request));
+	}
+
+	@Test
+	void getByEmailReturnsUserOrNotFound() {
+		User user = createUser();
+		when(userRepository.findByEmail("jb@gmail.com")).thenReturn(Optional.of(user));
+		when(userRepository.findByEmail("inconnu@test.com")).thenReturn(Optional.empty());
+
+		assertEquals(user, userService.getByEmail("jb@gmail.com"));
+		assertStatus(HttpStatus.NOT_FOUND, () -> userService.getByEmail("inconnu@test.com"));
+	}
+
+	// Connexion HTTP Basic : Spring Security charge l'utilisateur par son email, avec son hash et son rôle
+	@Test
+	void loadUserByUsernameGivesEmailPasswordHashAndRole() {
+		when(userRepository.findByEmail("jb@gmail.com")).thenReturn(Optional.of(createUser()));
+
+		UserDetails details = userService.loadUserByUsername("jb@gmail.com");
+
+		assertEquals("jb@gmail.com", details.getUsername());
+		assertEquals("hash", details.getPassword());
+		assertEquals("ROLE_ADMIN", details.getAuthorities().iterator().next().getAuthority());
+	}
+
+	@Test
+	void loadUserByUsernameRefusesUnknownEmail() {
+		when(userRepository.findByEmail("inconnu@test.com")).thenReturn(Optional.empty());
+
+		assertThrows(UsernameNotFoundException.class, () -> userService.loadUserByUsername("inconnu@test.com"));
+	}
+
+	private User createUser() {
+		User user = new User();
+		user.setEmail("jb@gmail.com");
+		user.setPassword("hash");
+		user.setRole(Role.ADMIN);
+		return user;
 	}
 
 	private void assertStatus(HttpStatus expectedStatus, Executable call) {

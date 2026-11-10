@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.grandcinema.dto.MovieRequest;
 import com.grandcinema.entity.Movie;
 import com.grandcinema.repository.MovieRepository;
 
@@ -24,17 +25,18 @@ public class MovieService {
 	}
 
 	// Crée un film après avoir vérifié son titre et sa durée
-	public Movie create(Movie movie) {
-		checkMovie(movie);
-		movie.setId(null);
+	public Movie create(MovieRequest request) {
+		Movie movie = new Movie();
+		fill(movie, request);
 		return movieRepository.save(movie);
 	}
 
 	// Modifie le film existant avec les nouvelles informations
-	public Movie update(Integer id, Movie movie) {
+	public Movie update(Integer id, MovieRequest request) {
 		checkExists(id);
-		checkMovie(movie);
+		Movie movie = new Movie();
 		movie.setId(id);
+		fill(movie, request);
 		return movieRepository.save(movie);
 	}
 
@@ -44,13 +46,16 @@ public class MovieService {
 		movieRepository.deleteById(id);
 	}
 
-	private void checkMovie(Movie movie) {
-		if (movie.getTitle() == null || movie.getTitle().isBlank()) {
+	private void fill(Movie movie, MovieRequest request) {
+		if (request.title() == null || request.title().isBlank()) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Le titre est obligatoire");
 		}
-		if (movie.getDuration() == null || movie.getDuration() <= 0) {
+		if (request.duration() == null || request.duration() <= 0) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La durée doit être supérieure à 0");
 		}
+		movie.setTitle(request.title());
+		movie.setDescription(request.description());
+		movie.setDuration(request.duration());
 	}
 
 	private void checkExists(Integer id) {
